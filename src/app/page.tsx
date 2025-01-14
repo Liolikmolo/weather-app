@@ -3,10 +3,10 @@ import { WeatherMain } from "@/types/weather-main";
 import axios from "axios";
 import { Container } from "@/components/container";
 import { DateInDay } from "@/utils/date-in-day";
-import { format, fromUnixTime } from "date-fns";
+import { format, fromUnixTime, parseISO } from "date-fns";
 import { WeatherIcon } from "@/components/weather-icon";
 import { WeatherDetail } from "@/components/weather-detail";
-// import { ForecastDetail } from "@/components/forecast-detail";
+import { ForecastDetail } from "@/components/forecast-detail";
 
 const Home = async () => { 
 
@@ -18,9 +18,14 @@ const Home = async () => {
   const uniqueDate = [
     ... new Set(data.list.map((entry) => new Date(entry.dt*1000).toISOString().split('T')[0]))
   ]
+  const firstDataForEachDate = uniqueDate.map((date) => {
+    return data.list.find((entry) => {
+      const entryDate = new Date(entry.dt * 1000).toISOString().split('T')[0];
+      const entryTime = new Date(entry.dt * 1000).getHours();
+      return entryDate === date && entryTime >= 6;
+    })
+  })
 
-  console.log(uniqueDate);
-  
   return (
     <div className="flex flex-col gap-4 bg-gray-100 min-h-screen">
       <NavBar />
@@ -83,22 +88,26 @@ const Home = async () => {
         {/* прогноз на 7 дней */}
         <section className="flex w-full flex-col gap-4">
           <p className="text-2xl">Прогноз погоды на 7 дней</p>
-          {/* <ForecastDetail
-            weatherIcon=""
-            date=""
-            day=""
-            temp={}
-            feels_like={ }
-            temp_min={ }
-            temp_max={ }
-            description=""
-            visibility=""
-            humidity=""
-            windSpeed=""
-            airPressure=""
-            sunrise=""
-            sunset=""
-          /> */}
+          {firstDataForEachDate.map((day, idx) => (
+            <ForecastDetail
+              key={idx}
+              weatherIcon={day?.weather[0].icon ?? 'icon'}
+              date={day ? format(parseISO(day.dt_txt), 'dd.MM') : ''}
+              day={day ? format(parseISO(day.dt_txt), 'dd.MM') : 'EEEE'}
+              temp={day?.main.temp ?? 0}
+              feels_like={day?.main.feels_like ?? 0}
+              temp_min={day?.main.temp_min ?? 0}
+              temp_max={day?.main.temp_max ?? 0}
+              description={day?.weather[0].description ?? ''}
+              visibility={`${day?.visibility} ?? 1000`}
+              humidity={`${day?.main.humidity}%`}
+              windSpeed={`${day?.wind.speed} м/с`}
+              airPressure={`${day?.main.pressure} Pa`}
+              sunrise={format(fromUnixTime(data.city.sunrise), 'H:mm')}
+              sunset={format(fromUnixTime(data.city.sunset), 'H:mm')}
+              />
+          ))}
+          
         </section>
       </main>
     </div>
