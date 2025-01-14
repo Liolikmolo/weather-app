@@ -8,9 +8,10 @@ import { WeatherIcon } from "@/components/weather-icon";
 import { WeatherDetail } from "@/components/weather-detail";
 import { ForecastDetail } from "@/components/forecast-detail";
 
-const Home = async () => { 
-
-  const { data }: {data: WeatherMain} = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?q=Minsk&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}&units=metric&lang=ru&cnt=56`);
+const Home = async () => {
+	const { data }: { data: WeatherMain } = await axios.get(
+		`https://api.openweathermap.org/data/2.5/forecast?q=Minsk&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}&units=metric&lang=ru&cnt=56`
+	);
 
   const firstDay = new Date(data.list[0].dt_txt)
   const today = DateInDay(firstDay.getDay())
